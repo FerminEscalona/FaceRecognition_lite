@@ -1,0 +1,261 @@
+{
+  "schema": 1,
+  "scope": "public-functional-only",
+  "robot_validated": false,
+  "acceptance": false,
+  "source": "AT&T Laboratories Cambridge / ORL",
+  "variants": {
+    "fp32": {
+      "model_version": "sface-fp32-f6ae35223478f49a5818",
+      "calibration_id": "04fc3a8d1a9243bf",
+      "dataset_digest": "b0ee8c9b6b7e313cbfc3bd7f9c4dadf8b65518633a93bd3728a63dab8d149c46",
+      "enrolled_people": 5,
+      "validation_queries": 65,
+      "test": {
+        "queries": 120,
+        "known_queries": 20,
+        "unknown_queries": 100,
+        "correct_known": 17,
+        "wrong_known": 0,
+        "false_unknown_identifications": 0,
+        "incorrect_assignments": 0,
+        "rejected_known": 3,
+        "rejected_unknown": 100,
+        "known_identification_rate": 0.85,
+        "known_identification_wilson95": [
+          0.6395811352592431,
+          0.9476312541037835
+        ],
+        "unknown_false_identification_rate": 0.0,
+        "unknown_false_identification_wilson95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "status_counts": {
+          "ambiguous": 2,
+          "identified": 17,
+          "unknown": 101
+        },
+        "comparator_valid_queries": 120,
+        "quality_rejections_are_not_identity_evidence": true,
+        "latency": {
+          "median_ms": 9.033979615196586,
+          "p95_ms": 10.21432145498693,
+          "max_ms": 11.295458069071174,
+          "over_2000_ms": 0,
+          "samples": 120
+        }
+      },
+      "numerical_quality_target_met": false,
+      "minimum_acceptance_coverage_met": false,
+      "benchmark": {
+        "environment": {
+          "python": "3.11.14",
+          "system": "Darwin",
+          "release": "27.0.0",
+          "machine": "arm64",
+          "opencv": "4.12.0",
+          "numpy": "2.2.6",
+          "runtime": "OpenCV DNN CPU",
+          "capture_latency_included": false
+        },
+        "model_version": "sface-fp32-f6ae35223478f49a5818",
+        "calibration_id": "04fc3a8d1a9243bf",
+        "threads": 2,
+        "gallery_people": 5,
+        "warmup": 5,
+        "cold_start_ms": 37.28279215283692,
+        "latency": {
+          "median_ms": 8.950374904088676,
+          "p95_ms": 10.01816833158955,
+          "max_ms": 11.276792036369443,
+          "over_2000_ms": 0,
+          "samples": 200
+        },
+        "stage_latency": {
+          "decode": {
+            "median_ms": 0.20093796774744987,
+            "p95_ms": 0.2315062563866377,
+            "max_ms": 0.2713750582188368,
+            "over_2000_ms": 0,
+            "samples": 200
+          },
+          "detect": {
+            "median_ms": 0.6394169759005308,
+            "p95_ms": 0.7321270299144088,
+            "max_ms": 0.853625126183033,
+            "over_2000_ms": 0,
+            "samples": 200
+          },
+          "align_quality": {
+            "median_ms": 0.11497898958623409,
+            "p95_ms": 0.14083342393860218,
+            "max_ms": 0.1727500930428505,
+            "over_2000_ms": 0,
+            "samples": 200
+          },
+          "embedding": {
+            "median_ms": 7.800812483765185,
+            "p95_ms": 8.831306174397467,
+            "max_ms": 10.117208119481802,
+            "over_2000_ms": 0,
+            "samples": 200
+          },
+          "match": {
+            "median_ms": 0.06052048411220312,
+            "p95_ms": 0.0755455810576677,
+            "max_ms": 0.1110411249101162,
+            "over_2000_ms": 0,
+            "samples": 200
+          }
+        },
+        "status_counts": {
+          "ambiguous": 4,
+          "identified": 34,
+          "unknown": 162
+        },
+        "peak_sampled_rss_bytes": 235732992,
+        "process_lifetime_peak_rss_bytes": 238338048,
+        "rss_median_drift_bytes": 1114112.0,
+        "memory_stability_observed": true,
+        "memory_stability_note": "Median second-half minus first-half RSS; <=10 MiB is a local heuristic, not a leak proof",
+        "cpu_seconds": 4.232548936,
+        "wall_seconds": 1.7917917920276523,
+        "mean_cpu_percent_one_core": 236.2187925423134,
+        "model_bytes": 38928942,
+        "capture_and_robot_load_validated": false,
+        "latency_target_locally_met": true,
+        "dataset_digest": "b0ee8c9b6b7e313cbfc3bd7f9c4dadf8b65518633a93bd3728a63dab8d149c46"
+      }
+    },
+    "int8": {
+      "model_version": "sface-int8-6b9d2097095b6e1b602d",
+      "calibration_id": "5ac3a93be5c5ec8a",
+      "dataset_digest": "b0ee8c9b6b7e313cbfc3bd7f9c4dadf8b65518633a93bd3728a63dab8d149c46",
+      "enrolled_people": 5,
+      "validation_queries": 65,
+      "test": {
+        "queries": 120,
+        "known_queries": 20,
+        "unknown_queries": 100,
+        "correct_known": 18,
+        "wrong_known": 0,
+        "false_unknown_identifications": 0,
+        "incorrect_assignments": 0,
+        "rejected_known": 2,
+        "rejected_unknown": 100,
+        "known_identification_rate": 0.9,
+        "known_identification_wilson95": [
+          0.6989663547715128,
+          0.9721335187862319
+        ],
+        "unknown_false_identification_rate": 0.0,
+        "unknown_false_identification_wilson95": [
+          3.469446951953614e-18,
+          0.03699349820698568
+        ],
+        "status_counts": {
+          "identified": 18,
+          "unknown": 102
+        },
+        "comparator_valid_queries": 120,
+        "quality_rejections_are_not_identity_evidence": true,
+        "latency": {
+          "median_ms": 7.747208583168685,
+          "p95_ms": 8.583339548204094,
+          "max_ms": 9.05833300203085,
+          "over_2000_ms": 0,
+          "samples": 120
+        }
+      },
+      "numerical_quality_target_met": false,
+      "minimum_acceptance_coverage_met": false,
+      "benchmark": {
+        "environment": {
+          "python": "3.11.14",
+          "system": "Darwin",
+          "release": "27.0.0",
+          "machine": "arm64",
+          "opencv": "4.12.0",
+          "numpy": "2.2.6",
+          "runtime": "OpenCV DNN CPU",
+          "capture_latency_included": false
+        },
+        "model_version": "sface-int8-6b9d2097095b6e1b602d",
+        "calibration_id": "5ac3a93be5c5ec8a",
+        "threads": 2,
+        "gallery_people": 5,
+        "warmup": 5,
+        "cold_start_ms": 14.39637504518032,
+        "latency": {
+          "median_ms": 8.091166499070823,
+          "p95_ms": 8.880098129156977,
+          "max_ms": 12.318374821916223,
+          "over_2000_ms": 0,
+          "samples": 200
+        },
+        "stage_latency": {
+          "decode": {
+            "median_ms": 0.14435395132750273,
+            "p95_ms": 0.19965837709605694,
+            "max_ms": 0.2348748967051506,
+            "over_2000_ms": 0,
+            "samples": 200
+          },
+          "detect": {
+            "median_ms": 0.6417084950953722,
+            "p95_ms": 0.7025938597507775,
+            "max_ms": 1.3408339582383633,
+            "over_2000_ms": 0,
+            "samples": 200
+          },
+          "align_quality": {
+            "median_ms": 0.09802100248634815,
+            "p95_ms": 0.1248293789103627,
+            "max_ms": 0.13391696847975254,
+            "over_2000_ms": 0,
+            "samples": 200
+          },
+          "embedding": {
+            "median_ms": 7.052541361190379,
+            "p95_ms": 7.797452004160731,
+            "max_ms": 10.425708023831248,
+            "over_2000_ms": 0,
+            "samples": 200
+          },
+          "match": {
+            "median_ms": 0.04464597441256046,
+            "p95_ms": 0.06371014751493931,
+            "max_ms": 0.13045896776020527,
+            "over_2000_ms": 0,
+            "samples": 200
+          }
+        },
+        "status_counts": {
+          "identified": 36,
+          "unknown": 164
+        },
+        "peak_sampled_rss_bytes": 107053056,
+        "process_lifetime_peak_rss_bytes": 109608960,
+        "rss_median_drift_bytes": 1835008.0,
+        "memory_stability_observed": true,
+        "memory_stability_note": "Median second-half minus first-half RSS; <=10 MiB is a local heuristic, not a leak proof",
+        "cpu_seconds": 4.060407224,
+        "wall_seconds": 1.624224792001769,
+        "mean_cpu_percent_one_core": 249.99047200823532,
+        "model_bytes": 10129522,
+        "capture_and_robot_load_validated": false,
+        "latency_target_locally_met": true,
+        "dataset_digest": "b0ee8c9b6b7e313cbfc3bd7f9c4dadf8b65518633a93bd3728a63dab8d149c46"
+      }
+    }
+  },
+  "candidate_eligible_locally": false,
+  "limitations": [
+    "20 known test queries, not 100",
+    "No verified session/camera separation",
+    "No own data or robot available",
+    "No threshold retuning on test",
+    "CPU-only Mac; capture/network excluded; samples are tiny grayscale images"
+  ]
+}
