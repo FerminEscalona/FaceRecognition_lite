@@ -52,4 +52,22 @@ Mantener la misma configuración en registro y robot. Tras una actualización, r
 
 La instancia serializa el acceso al estado nativo del modelo. Reutilizar una instancia persistente por worker. OpenCV configura los hilos globalmente en el proceso: todas las instancias en un mismo proceso deben compartir esa configuración y no cambiarla durante inferencia. El integrador controla la frecuencia y descarta fotogramas atrasados, sin acumular una cola ilimitada.
 
-No se incluye captura de cámara ni confirmación temporal. Los dos segundos se verifican externamente incluyendo captura. Las mediciones locales incluyen decodificación de archivos e inferencia, sin tiempos de red o consulta de datos personales.
+El motor no captura imágenes ni consulta bases de datos. La demo opcional `face-lite camera` integra captura en el Mac y el adaptador `SupabaseGallerySource`; no incluye captura mediante SDK del robot ni confirmación temporal. Los dos segundos se verifican externamente incluyendo captura. Las mediciones originales del modelo incluyen decodificación de archivos e inferencia, sin tiempos de red o consulta de datos personales.
+
+## Adaptador de Supabase para la demo local
+
+```python
+from face_lite.supabase_gallery import SupabaseSettings, SupabaseGallerySource
+
+with SupabaseGallerySource(SupabaseSettings.load()) as source:
+    gallery, diagnostics = source.fetch(
+        engine.model_version, engine.dimension, engine.config.enrollment_min_similarity
+    )
+    # Capturar una imagen reciente después de esta descarga y usar engine.identify.
+```
+
+El adaptador solo autentica y lee `face_templates`; no crea personas ni publica plantillas. Conserva la sesión en memoria y la renueva antes de caducar. Acepta embeddings como listas numéricas o texto JSON de vector; no altera valores ni etiquetas de modelo. Una lectura fallida genera `IntegrationError` con código, mensaje seguro y diagnóstico agregado, sin credenciales, identificadores personales ni vectores.
+
+Los comandos `supabase-check` y `camera` cargan `.env` desde la ruta explícita (predeterminado: directorio actual) y respetan variables del entorno. Los permisos del usuario autenticado determinan qué filas son visibles. No se asume acceso a toda la tabla. La demo rechaza una galería vacía, inválida o incompatible y cancela ese intento sin usar datos de otro momento.
+
+La ventana muestra `person_id` cuando corresponde; sus diagnósticos de terminal omiten el identificador. No descarga `persons` ni implementa la interacción de negocio. Los comandos existentes con archivos JSON conservan su comportamiento.

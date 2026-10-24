@@ -11,5 +11,7 @@ data/
 outputs/
 .DS_Store
 .env
+.env.*
+!.env.example
 *.onnx
 

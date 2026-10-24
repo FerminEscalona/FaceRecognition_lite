@@ -27,6 +27,18 @@ def parser() -> argparse.ArgumentParser:
     compare.add_argument("--baseline", type=Path, required=True)
     compare.add_argument("--candidate", type=Path, required=True)
     compare.add_argument("--output", type=Path, required=True)
+    for name in ("supabase-check", "camera"):
+        c = commands.add_parser(name, help="Read-only Supabase integration / on-demand photo demo")
+        c.add_argument("--env-file", type=Path, default=Path(".env"))
+        c.add_argument("--models", type=Path, default=Path("artifacts/models"))
+        c.add_argument("--config", type=Path)
+        c.add_argument("--variant", choices=("fp32", "int8"))
+        c.add_argument("--threads", type=int)
+        if name == "supabase-check":
+            c.add_argument("--output", type=Path, help="Optional aggregate diagnostics; no biometric vectors")
+        else:
+            c.add_argument("--camera", type=int, default=0, help="Camera index, default 0")
+            c.add_argument("--calibration", type=Path, required=True)
     for name in ("doctor", "template", "enroll", "identify", "calibrate", "evaluate", "experiment", "benchmark"):
         c = commands.add_parser(name)
         c.add_argument("--models", type=Path, default=Path("artifacts/models"))
@@ -106,6 +118,28 @@ def main(argv: list[str] | None = None) -> int:
             if getattr(args, key) is not None:
                 config[key] = getattr(args, key)
         engine = FaceEngine(args.models, PipelineConfig.from_dict(config))
+        if args.command in ("supabase-check", "camera"):
+            from .supabase_gallery import IntegrationError, SupabaseGallerySource, SupabaseSettings
+            try:
+                settings = SupabaseSettings.load(args.env_file)
+                with SupabaseGallerySource(settings) as source:
+                    if args.command == "supabase-check":
+                        try:
+                            _, result = source.fetch(engine.model_version, engine.dimension,
+                                                     engine.config.enrollment_min_similarity)
+                        except IntegrationError as error:
+                            result = error.report()
+                        if args.output:
+                            write_json(args.output, result)
+                        print(json.dumps(result, ensure_ascii=False))
+                        return 0 if result["status"] == "compatible" else 2
+                    from .camera import run_camera
+                    policy = Calibration(**read_json(args.calibration))
+                    run_camera(engine, source, policy, camera_index=args.camera)
+                    return 0
+            except IntegrationError as error:
+                print(json.dumps(error.report(), ensure_ascii=False), file=sys.stderr)
+                return 2
         if args.command == "doctor":
             result = {"status": "ready", "environment": environment(), "manifest": engine.manifest,
                       "cold_start_ms": engine.cold_start_ms,

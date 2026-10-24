@@ -10,7 +10,7 @@ El robot debe identificar al menos a cinco personas en interiores, una por image
 
 Se prioriza evitar confundir personas. Si la evidencia es insuficiente o ambigua, el resultado no contiene identidad. «Liviano» significa consumir recursos de forma controlada mientras el robot hace otras tareas; ejecutar en ESP32 no es requisito.
 
-Este repositorio entrega detección, alineación, embeddings, registro de tres plantillas, comparación, calibración, evaluación y medición. La web, backend HTTP, Supabase, sincronización, captura física, control del robot y decisiones de acceso pertenecen a la integración externa. El backend aún está por definir; la primera entrega es Python, no un modelo para navegador.
+Este repositorio entrega detección, alineación, embeddings, registro de tres plantillas, comparación, calibración, evaluación y medición. Incluye una demo adicional de lectura de Supabase y captura por foto con cámara del Mac. La web, backend HTTP, sincronización del robot, captura mediante su SDK, control del robot y decisiones de acceso pertenecen a la integración externa. El backend aún está por definir; la primera entrega es Python, no un modelo para navegador.
 
 ```text
 Teléfono: frontal + giro izquierdo + giro derecho
@@ -47,6 +47,8 @@ face-lite doctor --output outputs/doctor.json
 ```
 
 La descarga es explícita y requiere internet. La inferencia posterior funciona sin internet ni Supabase. Los tres artefactos se comprueban contra los SHA-256 del repositorio oficial, fijados en `face_lite.artifacts`. Sus licencias se descargan junto a los pesos. Los modelos se mantienen en `artifacts/models/`, fuera de Git.
+
+En macOS se instala `opencv-python` para mostrar la vista previa; en otros sistemas se usa `opencv-python-headless`. Si actualizas un entorno antiguo de este proyecto en macOS, desinstala primero `opencv-python-headless` y después ejecuta los comandos de instalación anteriores. No instales ambas distribuciones de OpenCV en el mismo entorno.
 
 La referencia usa OpenCV 4.12.0, YuNet 2023mar y SFace 2021dec ONNX. La variante `int8` tiene versión propia. El manifiesto exporta revisión, hashes, dimensión, procesamiento y configuración. No se afirma que un archivo INT8 tenga aceleración hardware o menor uso de CPU sin medirlo.
 
@@ -91,6 +93,41 @@ face-lite identify --image robot-query.jpg --gallery outputs/gallery.json --cali
 
 Para integración reutilizar `FaceEngine`, `Gallery` y `Calibration`; consultar los ejemplos del contrato. Las rutas o bytes aplican EXIF. Los arrays deben ser BGR `uint8` ya orientados. El modelo se carga una vez por worker y se reutiliza; no construirlo por foto.
 
+## Demo con Supabase y cámara del MacBook
+
+El [plan de integración](plans/02-supabase-camara-macbook.md) incorpora lectura autenticada de `face_templates`, sin modificar datos ni políticas. Las credenciales están en `.env`, ignorado por Git y con permisos `0600`. Para otro equipo, copiar `.env.example` a `.env`, completar las cuatro variables y ejecutar `chmod 600 .env`. Las variables del entorno tienen prioridad; no se buscan archivos de configuración fuera de la ruta indicada. No compartas el `.env`.
+
+Comprobar primero conexión y compatibilidad:
+
+```bash
+source .venv/bin/activate
+face-lite supabase-check
+```
+
+Muestra filas y personas **visibles para ese usuario**, dimensión, versiones y validación. No muestra embeddings ni identificadores personales. `--output outputs/supabase-check.json` permite guardar solo esos diagnósticos agregados. Si no hay filas visibles, revisar tanto registros como permisos SELECT/RLS: una consulta vacía no prueba que la tabla esté vacía.
+
+La demo usa la calibración existente de ORL **de manera provisional**. Si aún no tienes ese archivo, genera el experimento público descrito arriba. Después:
+
+```bash
+face-lite camera --camera 0 --calibration outputs/orl-fp32/calibration.json
+```
+
+- **Espacio:** consulta Supabase, valida una galería nueva, toma el siguiente fotograma y reconoce una sola foto.
+- **Escape o cerrar ventana:** termina y libera la cámara.
+- La ventana muestra estado, `person_id`, similitud coseno y tiempos. El terminal omite identificadores personales. La similitud no es porcentaje de certeza.
+- La vista previa no ejecuta reconocimiento. Durante la descarga se mantiene la vista previa; no se encolan nuevas solicitudes. Un fallo de consulta o validación cancela el intento sin usar una galería antigua.
+- Imágenes, vectores y sesión se mantienen en memoria; no se guardan fotos ni galerías. La demo necesita internet en cada intento, aunque el motor de reconocimiento funciona localmente.
+
+Ambos comandos admiten `--env-file`, `--models`, `--config`, `--variant` y `--threads`. El índice predeterminado es 0; si macOS elige otra cámara (por ejemplo, Continuity Camera), prueba el índice correspondiente. El tamaño de imagen lo entrega la cámara; esta demo no promete una resolución fija. La entrada al modelo es el fotograma BGR original, sin textos de la vista previa.
+
+Si aparece `camera_unavailable`, acepta el permiso de cámara de macOS para la aplicación que ejecuta Python (Codex o Terminal), revisa **Configuración del Sistema → Privacidad y seguridad → Cámara**, cierra otras aplicaciones que estén usando el dispositivo y vuelve a ejecutar el comando. La primera solicitud de permiso puede requerir volver a lanzar el proceso. En sistemas con OpenCV headless no está disponible esta ventana.
+
+`incompatible_model` o `invalid_embeddings` requieren corregir el registro en el backend; no renombrar versiones ni renormalizar vectores para forzar aceptación. La galería exige tres plantillas distintas y consistentes por persona. La demo consulta todas las plantillas visibles y rechaza versiones mezcladas. No incluye nombres, categorías ni destinos; esos datos permanecen en la integración de negocio.
+
+La consulta se pagina con orden estable y comprueba cambios en el conteo. Las peticiones REST independientes no ofrecen una transacción única entre páginas; para galerías grandes con altas y bajas concurrentes haría falta un contrato adicional de instantáneas. No se implementan suscripciones Realtime ni caché persistente.
+
+Los tiempos distinguen consulta y validación de la galería, captura e identificación; el total incluye la espera entre la solicitud y el resultado. La latencia de red de esta demo se mide aparte del objetivo de identificación en el robot. Usar la calibración pública no acredita precisión con los usuarios reales; consultar [verificación de integración](reports/integracion-supabase-camara.md).
+
 ## Comparación y consumo
 
 Ejecutar los benchmarks secuencialmente en procesos distintos, sin otras mediciones simultáneas:
@@ -122,7 +159,7 @@ python -m pytest -q
 python -m build --no-isolation
 ```
 
-Las pruebas de integración requieren los artefactos descargados y ORL; si faltan, se marcan como omitidas. Las pruebas unitarias cubren contratos, desconocidos, ambigüedad, registro atómico, datos inválidos y fugas entre particiones. La distribución contiene código; pesos y calibración se entregan por separado con su manifiesto. No se incluye HTTP ni acceso a la base de datos.
+Las pruebas de integración requieren los artefactos descargados y ORL; si faltan, se marcan como omitidas. Las pruebas unitarias cubren contratos, desconocidos, ambigüedad, registro atómico, datos inválidos, fugas entre particiones y adaptadores de Supabase/cámara sin credenciales reales. La distribución contiene código; pesos y calibración se entregan por separado con su manifiesto. No se incluye servidor HTTP. Las pruebas normales no abren la cámara ni consultan Supabase.
 
 ## Datos y límites pendientes
 
